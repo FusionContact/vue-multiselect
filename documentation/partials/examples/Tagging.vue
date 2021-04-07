@@ -10,6 +10,7 @@ div
     :options="options",
     :multiple="true",
     :taggable="true",
+    :showSelectedAsTag="true",
     @tag="addTag"
   )
   pre.language-json
