@@ -8,21 +8,15 @@ div
     :close-on-select="false",
     :clear-on-select="false",
     :preserve-search="true",
-    placeholder="Pick some"
+    :searchable="true",
+    placeholder="Pick some",
     label="name",
     track-by="name",
     :preselect-first="true"
   )
-    template(
-      slot="selection"
-      slot-scope="{ values, search, isOpen }"
-    )
-      span.multiselect__single(v-if="values.length && !isOpen")
-        | {{ values.length }} options selected
   pre.language-json
     code.
       {{ value  }}
-
 </template>
 
 <script>

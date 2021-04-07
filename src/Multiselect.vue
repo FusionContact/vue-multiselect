@@ -10,147 +10,218 @@
     @keyup.esc="deactivate()"
     class="multiselect"
     role="combobox"
-    :aria-owns="'listbox-'+id">
-      <slot name="caret" :toggle="toggle">
-        <div @mousedown.prevent.stop="toggle()" class="multiselect__select"></div>
-      </slot>
-      <slot name="clear" :search="search"></slot>
-      <div ref="tags" class="multiselect__tags">
-        <slot
-          name="selection"
-          :search="search"
-          :remove="removeElement"
-          :values="visibleValues"
-          :is-open="isOpen"
+    :aria-owns="'listbox-'+id"
+  >
+    <slot
+      name="caret"
+      :toggle="toggle"
+    >
+      <div
+        @mousedown.prevent.stop="toggle()"
+        class="multiselect__select"
+      ></div>
+    </slot>
+    <slot
+      name="clear"
+      :search="search"
+    ></slot>
+    <div
+      ref="tags"
+      class="multiselect__tags"
+    >
+      <slot
+        name="selection"
+        :search="search"
+        :remove="removeElement"
+        :values="visibleValues"
+        :is-open="isOpen"
+      >
+        <div
+          class="multiselect__tags-wrap"
+          v-show="visibleValues.length > 0 && showSelectedAsTag"
         >
-          <div class="multiselect__tags-wrap" v-show="visibleValues.length > 0">
-            <template v-for="(option, index) of visibleValues" @mousedown.prevent>
-              <slot name="tag" :option="option" :search="search" :remove="removeElement">
-                <span class="multiselect__tag" :key="index">
-                  <span v-text="getOptionLabel(option)"></span>
-                  <i tabindex="1" @keypress.enter.prevent="removeElement(option)"  @mousedown.prevent="removeElement(option)" class="multiselect__tag-icon"></i>
-                </span>
-              </slot>
-            </template>
-          </div>
-          <template v-if="internalValue && internalValue.length > limit">
-            <slot name="limit">
-              <strong class="multiselect__strong" v-text="limitText(internalValue.length - limit)"/>
+          <template
+            v-for="(option, index) of visibleValues"
+            @mousedown.prevent
+          >
+            <slot
+              name="tag"
+              :option="option"
+              :search="search"
+              :remove="removeElement"
+            >
+              <span
+                class="multiselect__tag"
+                :key="index"
+              >
+                <span v-text="getOptionLabel(option)"></span>
+                <i
+                  tabindex="1"
+                  @keypress.enter.prevent="removeElement(option)"
+                  @mousedown.prevent="removeElement(option)"
+                  class="multiselect__tag-icon"
+                ></i>
+              </span>
             </slot>
           </template>
-        </slot>
-        <transition name="multiselect__loading">
-          <slot name="loading">
-            <div v-show="loading" class="multiselect__spinner"/>
-          </slot>
-        </transition>
-        <input
-          ref="search"
-          v-if="searchable"
-          :name="name"
-          :id="id"
-          type="text"
-          autocomplete="off"
-          spellcheck="false"
-          :placeholder="placeholder"
-          :style="inputStyle"
-          :value="search"
-          :disabled="disabled"
-          :tabindex="tabindex"
-          @input="updateSearch($event.target.value)"
-          @focus.prevent="activate()"
-          @blur.prevent="deactivate()"
-          @keyup.esc="deactivate()"
-          @keydown.down.prevent="pointerForward()"
-          @keydown.up.prevent="pointerBackward()"
-          @keypress.enter.prevent.stop.self="addPointerElement($event)"
-          @keydown.delete.stop="removeLastElement()"
-          class="multiselect__input"
-          :aria-controls="'listbox-'+id"
-        />
-        <span
-          v-if="isSingleLabelVisible"
-          class="multiselect__single"
-          @mousedown.prevent="toggle"
-        >
-          <slot name="singleLabel" :option="singleValue">
-            <template>{{ currentOptionLabel }}</template>
-          </slot>
-        </span>
-        <span
-          v-if="isPlaceholderVisible"
-          class="multiselect__placeholder"
-          @mousedown.prevent="toggle"
-        >
-          <slot name="placeholder">
-            {{ placeholder }}
-          </slot>
-        </span>
-      </div>
-      <transition name="multiselect">
-        <div
-          class="multiselect__content-wrapper"
-          v-show="isOpen"
-          @focus="activate"
-          tabindex="-1"
-          @mousedown.prevent
-          :style="{ maxHeight: optimizedHeight + 'px' }"
-          ref="list"
-        >
-          <ul class="multiselect__content" :style="contentStyle" role="listbox" :id="'listbox-'+id">
-            <slot name="beforeList"></slot>
-            <li v-if="multiple && max === internalValue.length">
-              <span class="multiselect__option">
-                <slot name="maxElements">Maximum of {{ max }} options selected. First remove a selected option to select another.</slot>
-              </span>
-            </li>
-            <template v-if="!max || internalValue.length < max">
-              <li class="multiselect__element"
-                v-for="(option, index) of filteredOptions"
-                :key="index"
-                v-bind:id="id + '-' + index"
-                v-bind:role="!(option && (option.$isLabel || option.$isDisabled)) ? 'option' : null">
-                <span
-                  v-if="!(option && (option.$isLabel || option.$isDisabled))"
-                  :class="optionHighlight(index, option)"
-                  @click.stop="select(option)"
-                  @mouseenter.self="pointerSet(index)"
-                  :data-select="option && option.isTag ? tagPlaceholder : selectLabelText"
-                  :data-selected="selectedLabelText"
-                  :data-deselect="deselectLabelText"
-                  class="multiselect__option">
-                    <slot name="option" :option="option" :search="search" :index="index">
-                      <span>{{ getOptionLabel(option) }}</span>
-                    </slot>
-                </span>
-                <span
-                  v-if="option && (option.$isLabel || option.$isDisabled)"
-                  :data-select="groupSelect && selectGroupLabelText"
-                  :data-deselect="groupSelect && deselectGroupLabelText"
-                  :class="groupHighlight(index, option)"
-                  @mouseenter.self="groupSelect && pointerSet(index)"
-                  @mousedown.prevent="selectGroup(option)"
-                  class="multiselect__option">
-                    <slot name="option" :option="option" :search="search" :index="index">
-                      <span>{{ getOptionLabel(option) }}</span>
-                    </slot>
-                </span>
-              </li>
-            </template>
-            <li v-show="showNoResults && (filteredOptions.length === 0 && search && !loading)">
-              <span class="multiselect__option">
-                <slot name="noResult" :search="search">No elements found. Consider changing the search query.</slot>
-              </span>
-            </li>
-            <li v-show="showNoOptions && (options.length === 0 && !search && !loading)">
-              <span class="multiselect__option">
-                <slot name="noOptions">List is empty.</slot>
-              </span>
-            </li>
-            <slot name="afterList"></slot>
-          </ul>
         </div>
+        <template v-if="internalValue && internalValue.length > limit">
+          <slot name="limit">
+            <strong
+              class="multiselect__strong"
+              v-text="limitText(internalValue.length - limit)"
+            />
+          </slot>
+        </template>
+        <template v-if="!showSelectedAsTag && visibleValues.length > 0 && (!searchable || !isOpen)">
+          <slot name="multipleOptionsSelected">
+            <span
+              class="multiselect__single"
+              v-text="multipleOptionsSelectedText(visibleValues)"
+            />
+          </slot>
+        </template>
+      </slot>
+      <transition name="multiselect__loading">
+        <slot name="loading">
+          <div
+            v-show="loading"
+            class="multiselect__spinner"
+          />
+        </slot>
       </transition>
+      <input
+        ref="search"
+        v-if="searchable"
+        :name="name"
+        :id="id"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        :placeholder="placeholder"
+        :style="inputStyle"
+        :value="search"
+        :disabled="disabled"
+        :tabindex="tabindex"
+        @input="updateSearch($event.target.value)"
+        @focus.prevent="activate()"
+        @blur.prevent="deactivate()"
+        @keyup.esc="deactivate()"
+        @keydown.down.prevent="pointerForward()"
+        @keydown.up.prevent="pointerBackward()"
+        @keypress.enter.prevent.stop.self="addPointerElement($event)"
+        @keydown.delete.stop="removeLastElement()"
+        class="multiselect__input"
+        :aria-controls="'listbox-'+id"
+      />
+      <span
+        v-if="isSingleLabelVisible"
+        class="multiselect__single"
+        @mousedown.prevent="toggle"
+      >
+        <slot
+          name="singleLabel"
+          :option="singleValue"
+        >
+          <template>{{ currentOptionLabel }}</template>
+        </slot>
+      </span>
+      <span
+        v-if="isPlaceholderVisible"
+        class="multiselect__placeholder"
+        @mousedown.prevent="toggle"
+      >
+        <slot name="placeholder">
+          {{ placeholder }}
+        </slot>
+      </span>
+    </div>
+    <transition name="multiselect">
+      <div
+        class="multiselect__content-wrapper"
+        v-show="isOpen"
+        @focus="activate"
+        tabindex="-1"
+        @mousedown.prevent
+        :style="{ maxHeight: optimizedHeight + 'px' }"
+        ref="list"
+      >
+        <ul
+          class="multiselect__content"
+          :style="contentStyle"
+          role="listbox"
+          :id="'listbox-'+id"
+        >
+          <slot name="beforeList"></slot>
+          <li v-if="multiple && max === internalValue.length">
+            <span class="multiselect__option">
+              <slot name="maxElements">Maximum of {{ max }} options selected. First remove a selected option to select another.</slot>
+            </span>
+          </li>
+          <template v-if="!max || internalValue.length < max">
+            <li
+              class="multiselect__element"
+              v-for="(option, index) of filteredOptions"
+              :key="index"
+              v-bind:id="id + '-' + index"
+              v-bind:role="!(option && (option.$isLabel || option.$isDisabled)) ? 'option' : null"
+            >
+              <span
+                v-if="!(option && (option.$isLabel || option.$isDisabled))"
+                :class="optionHighlight(index, option)"
+                @click.stop="select(option)"
+                @mouseenter.self="pointerSet(index)"
+                :data-select="option && option.isTag ? tagPlaceholder : selectLabelText"
+                :data-selected="selectedLabelText"
+                :data-deselect="deselectLabelText"
+                class="multiselect__option"
+              >
+                <slot
+                  name="option"
+                  :option="option"
+                  :search="search"
+                  :index="index"
+                >
+                  <span>{{ getOptionLabel(option) }}</span>
+                </slot>
+              </span>
+              <span
+                v-if="option && (option.$isLabel || option.$isDisabled)"
+                :data-select="groupSelect && selectGroupLabelText"
+                :data-deselect="groupSelect && deselectGroupLabelText"
+                :class="groupHighlight(index, option)"
+                @mouseenter.self="groupSelect && pointerSet(index)"
+                @mousedown.prevent="selectGroup(option)"
+                class="multiselect__option"
+              >
+                <slot
+                  name="option"
+                  :option="option"
+                  :search="search"
+                  :index="index"
+                >
+                  <span>{{ getOptionLabel(option) }}</span>
+                </slot>
+              </span>
+            </li>
+          </template>
+          <li v-show="showNoResults && (filteredOptions.length === 0 && search && !loading)">
+            <span class="multiselect__option">
+              <slot
+                name="noResult"
+                :search="search"
+              >No elements found. Consider changing the search query.</slot>
+            </span>
+          </li>
+          <li v-show="showNoOptions && (options.length === 0 && !search && !loading)">
+            <span class="multiselect__option">
+              <slot name="noOptions">List is empty.</slot>
+            </span>
+          </li>
+          <slot name="afterList"></slot>
+        </ul>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -255,6 +326,18 @@ export default {
       default: count => `and ${count} more`
     },
     /**
+     * Function that process the message shown to display the selected options.
+     * @default 'and * more'
+     * @param {Int} count Number of elements more than limit
+     * @type {Function}
+     */
+    multipleOptionsSelectedText: {
+      type: Function,
+      default: function (options) {
+        return options.length > 1 ? `${options.length} options selected` : this.getOptionLabel(options[0])
+      }
+    },
+    /**
      * Set true to trigger the loading spinner.
      * @default False
      * @type {Boolean}
@@ -297,6 +380,10 @@ export default {
     tabindex: {
       type: Number,
       default: 0
+    },
+    showSelectedAsTag: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
