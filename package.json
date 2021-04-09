@@ -1,6 +1,6 @@
 {
   "name": "@fusioncontact/vue-multiselect",
-  "version": "2.1.7",
+  "version": "2.1.8",
   "private": false,
   "types": "index.d.ts",
   "scripts": {
