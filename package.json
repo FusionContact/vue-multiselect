@@ -1,6 +1,6 @@
 {
-  "name": "vue-multiselect",
-  "version": "2.1.6",
+  "name": "@fusioncontact/vue-multiselect",
+  "version": "2.1.7",
   "private": false,
   "types": "index.d.ts",
   "scripts": {
@@ -95,7 +95,7 @@
   "author": "Damian Dulisz <damian.dulisz@gmail.com>",
   "jsnext:main": "dist/vue-multiselect.min.js",
   "bugs": {
-    "url": "https://github.com/shentao/vue-multiselect/issues"
+    "url": "https://github.com/FusionContact/vue-multiselect/issues"
   },
   "jspm": {
     "main": "dist/vue-multiselect.min.js",
@@ -104,9 +104,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shentao/vue-multiselect.git"
+    "url": "git+https://github.com/FusionContact/vue-multiselect.git"
   },
-  "description": "Multiselect component for vue.js",
+  "description": "Multiselect component for vue.js | Modified for use by FusionContact",
   "unpkg": "dist/vue-multiselect.min.js",
   "engines": {
     "node": ">= 4.0.0",
