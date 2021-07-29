@@ -613,7 +613,7 @@ fieldset[disabled] .multiselect {
 }
 
 .multiselect__tags {
-  min-height: 40px;
+  min-height: 38px;
   display: block;
   padding: 8px 40px 0 8px;
   border-radius: 5px;
